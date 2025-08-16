@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Playroom — Games by <your-name></title>
+    <meta name="description" content="A high-end, animated gallery showcasing my AI games. Easily updated via a simple dictionary.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Hover tilt -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
+    <style>
+      :root {
+        --bg: #080a14;
+        --stroke: rgba(255,255,255,0.12);
+        --accent-a: #8ab5ff;
+        --accent-b: #ff7cc8;
+      }
+      html, body { height: 100%; }
+      body {
+        background: radial-gradient(1200px 600px at 80% -10%, rgba(66,99,255,0.20), transparent 50%),
+                    radial-gradient(800px 400px at -10% 20%, rgba(255,91,196,0.18), transparent 40%),
+                    var(--bg);
+        color: #eaf0ff;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      }
+
+      .glass { background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); border: 1px solid var(--stroke); backdrop-filter: blur(10px); }
+      .btn { border: 1px solid var(--stroke); background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02)); }
+      .btn:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-1px); }
+      .soft-gradient { background: linear-gradient(90deg, var(--accent-a) 0%, #ad8bff 50%, var(--accent-b) 100%); }
+      .text-gradient { background: linear-gradient(90deg, #cfe0ff, #ffd1ec); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+      /* Fancy underline for heading */
+      .underline-fancy { position: relative; }
+      .underline-fancy::after { content:''; position:absolute; left:0; right:0; bottom:-6px; height:3px; border-radius:999px; background: linear-gradient(90deg,var(--accent-a),#c999ff,var(--accent-b)); opacity:0.6; }
+
+      /* Tag highlight */
+      .tag { transition: all .2s ease; }
+      .tag--active { background: rgba(255,255,255,0.12); border-color: rgba(137,163,255,0.65) !important; box-shadow: 0 0 0 2px rgba(137,163,255,0.35) inset; }
+
+      /* Custom dropdown (so native white popup can't bite) */
+      .menu { position: absolute; right: 0; top: 100%; margin-top: .5rem; width: 11rem; z-index: 30; }
+      .menu .item { display: block; width: 100%; text-align: left; padding: .5rem .75rem; border-radius: .5rem; border: 1px solid transparent; }
+      .menu .item:hover { background: rgba(255,255,255,0.08); }
+      .menu .item[aria-selected="true"] { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); }
+
+      /* Hero canvas */
+      #hero-wrap { position: relative; }
+      #hero-canvas { display:block; width:100%; height:100%; }
+    </style>
+  </head>
+
+  <body class="min-h-screen selection:bg-indigo-500/30 selection:text-white">
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-40 bg-[rgba(8,10,20,0.65)] backdrop-blur border-b border-white/10">
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl soft-gradient"></div>
+          <div class="leading-tight">
+            <p class="text-sm text-white/60">AI Playroom</p>
+            <h1 class="font-[Orbitron] text-lg tracking-wider">My AI Games</h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-random" class="btn px-4 py-2 rounded-xl text-sm hover:-translate-y-0.5 transition">Play Random</button>
+          <a id="github-link" href="https://github.com/your-username" target="_blank" rel="noopener" class="btn px-4 py-2 rounded-xl text-sm">GitHub</a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div>
+          <p class="text-indigo-300/80 text-sm tracking-widest uppercase mb-3">Playable Experiments</p>
+          <h2 class="font-[Orbitron] text-4xl sm:text-5xl lg:text-6xl leading-[1.05] mb-4">
+            A <span class="text-gradient underline-fancy">living library</span> of my
+            <span class="text-gradient">AI-driven</span> games
+          </h2>
+          <p class="text-white/80 text-lg max-w-xl">Tap into fast, addictive mechanics with ML twists. Every tile below is generated from a simple dictionary — add a new object, and the page updates itself.</p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="#gallery" class="btn px-5 py-3 rounded-2xl">Browse Gallery ↓</a>
+            <button id="copy-template" class="btn px-5 py-3 rounded-2xl" title="Copies a ready-to-edit game object to your clipboard">Copy Game Object</button>
+          </div>
+        </div>
+        <div>
+          <div class="relative">
+            <div class="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[length:18px_18px] opacity-30"></div>
+            <div id="hero-wrap" class="relative aspect-[4/3] rounded-[2rem] glass overflow-hidden border border-white/10">
+              <canvas id="hero-canvas"></canvas>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm mt-3">Interactive background driven by your cursor.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTROLS -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="gallery">
+      <div class="glass rounded-2xl p-4 sm:p-5 mb-6 border border-white/10">
+        <div class="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+          <div class="flex-1 flex items-center gap-3">
+            <input id="search" type="search" placeholder="Search by title, tag, or description…" class="w-full bg-transparent border border-white/15 rounded-xl px-4 py-3 placeholder:text-white/40 focus:outline-none focus:border-white/30"/>
+          </div>
+
+          <!-- Custom sort dropdown -->
+          <div id="sort-control" class="relative">
+            <button id="sort-btn" class="btn px-3 py-2 rounded-xl text-sm flex items-center gap-2">Sort: <span id="sort-label">Newest</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="opacity-70"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <div id="sort-menu" class="menu glass border border-white/15 rounded-xl p-1 hidden">
+              <button class="item" data-sort="newest">Newest</button>
+              <button class="item" data-sort="oldest">Oldest</button>
+              <button class="item" data-sort="az">A → Z</button>
+              <button class="item" data-sort="za">Z → A</button>
+            </div>
+          </div>
+        </div>
+        <div id="tag-bar" class="mt-3 flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- GRID -->
+      <div id="grid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-5"></div>
+      <div id="empty-state" class="hidden text-center py-16 text-white/60">No games match your search. Try clearing filters.</div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="glass rounded-2xl p-6 border border-white/10">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="text-white/70">A portfolio of experimental games built using AI and modern web technologies.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ===================== DATA (Edit me) ===================== -->
+    <script>
+      const GAMES = [
+        { id:'color-clash', title:'Color Clash', subtitle:'A brutally addictive browser game that pits you against your own brain.', cover:'', description:'Welcome to Color Clash, a minimalist game that is deceptively simple to play but surprisingly difficult to master. It is a fast-paced test of your mental focus, designed to be the ultimate "just one more try" experience.', tags:['Quick Reflexes','Psychology'], links:{ play:'https://kewlaashish.github.io/Color-Clash/', code:'https://github.com/KewlAashish/Color-Clash' }, date:'2025-08-10' },
+      ];
+    </script>
+
+    <!-- ===================== APP ===================== -->
+    <script>
+      const $grid = document.getElementById('grid');
+      const $tagBar = document.getElementById('tag-bar');
+      const $search = document.getElementById('search');
+      const $sortBtn = document.getElementById('sort-btn');
+      const $sortMenu = document.getElementById('sort-menu');
+      const $sortLabel = document.getElementById('sort-label');
+      const $copyTemplate = document.getElementById('copy-template');
+
+      const state = { query: '', tags: new Set(), sort: 'newest' };
+
+      // Polished, centered placeholder with title initials
+      function placeholder(title='Game'){
+        const words = (title.match(/[A-Za-z0-9]+/g) || []);
+        const initials = (words[0]?.[0]||'G') + (words[1]?.[0]||'');
+        const a = getComputedStyle(document.documentElement).getPropertyValue('--accent-a') || '#8ab5ff';
+        const b = getComputedStyle(document.documentElement).getPropertyValue('--accent-b') || '#ff7cc8';
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'>
+          <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='${a}'/><stop offset='100%' stop-color='${b}'/></linearGradient></defs>
+          <rect width='1200' height='675' fill='#0f1730'/>
+          <g opacity='0.25'><circle cx='280' cy='230' r='170' fill='url(#g)'/><circle cx='920' cy='420' r='210' fill='url(#g)'/></g>
+          <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Inter, Arial' font-size='120' fill='#eaf0ff' opacity='0.9'>${initials.toUpperCase()}</text>
+        </svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      }
+
+      const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      const byNewest = (a,b)=> (b.date||'').localeCompare(a.date||'');
+      const byOldest = (a,b)=> (a.date||'').localeCompare(b.date||'');
+      const byAZ = (a,b)=> a.title.localeCompare(b.title);
+      const byZA = (a,b)=> b.title.localeCompare(a.title);
+
+      function uniqueTags(){ const set=new Set(); GAMES.forEach(g => (g.tags||[]).forEach(t => set.add(t))); return Array.from(set).sort(); }
+
+      function matches(game){
+        const q = state.query.trim().toLowerCase();
+        const inText = !q || game.title.toLowerCase().includes(q) ||
+          (game.subtitle||'').toLowerCase().includes(q) ||
+          (game.description||'').toLowerCase().includes(q) ||
+          (game.tags||[]).some(t=>t.toLowerCase().includes(q));
+        const tagsOk = state.tags.size===0 || (game.tags||[]).some(t=>state.tags.has(t));
+        return inText && tagsOk;
+      }
+
+      function sortGames(list){ switch(state.sort){ case 'oldest': return list.sort(byOldest); case 'az': return list.sort(byAZ); case 'za': return list.sort(byZA); default: return list.sort(byNewest); } }
+
+      function renderTags(){
+        $tagBar.innerHTML = '';
+        uniqueTags().forEach(tag => {
+          const active = state.tags.has(tag);
+          const btn = document.createElement('button');
+          btn.className = 'tag px-3 py-1.5 rounded-full text-xs border ' + (active ? 'tag--active border-white/30' : 'border-white/15 bg-transparent');
+          btn.textContent = tag; btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+          btn.onclick = ()=>{ active ? state.tags.delete(tag) : state.tags.add(tag); renderTags(); render(); };
+          $tagBar.appendChild(btn);
+        });
+        if (state.tags.size>0){ const clear=document.createElement('button'); clear.className='px-2.5 py-1.5 rounded-full text-xs border border-white/15 hover:border-white/30'; clear.textContent='Clear'; clear.onclick=()=>{ state.tags.clear(); renderTags(); render(); }; $tagBar.appendChild(clear); }
+      }
+
+      function cardTemplate(game){
+        const id = game.id || slugify(game.title);
+        const cover = game.cover && game.cover.trim() ? game.cover : placeholder(game.title);
+        const tags = (game.tags||[]).map(t=>`<span class="text-[10px] px-2 py-1 rounded-full border border-white/15">${t}</span>`).join(' ');
+        return `
+          <article id="${id}" class="group relative glass rounded-2xl overflow-hidden border border-white/10" data-tilt data-tilt-max="6" data-tilt-speed="400">
+            <div class="relative">
+              <img data-src="${cover}" alt="${game.title} cover" class="card-img w-full h-48 object-cover object-center" loading="lazy"/>
+              <div class="absolute top-3 left-3 flex flex-wrap gap-1">${tags}</div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-semibold text-lg leading-tight mb-0.5">${game.title}</h3>
+              ${game.subtitle?`<p class="text-white/60 text-sm mb-1">${game.subtitle}</p>`:''}
+              ${game.description?`<p class="text-white/70 text-sm">${game.description}</p>`:''}
+              <div class="mt-4 flex items-center gap-2">
+                ${game.links?.play?`<a href="${game.links.play}" target="_blank" class="btn text-sm px-3 py-2 rounded-xl">Play</a>`:''}
+                ${game.links?.code?`<a href="${game.links.code}" target="_blank" class="btn text-sm px-3 py-2 rounded-xl">Code</a>`:''}
+                ${game.links?.video?`<a href="${game.links.video}" target="_blank" class="btn text-sm px-3 py-2 rounded-xl">Video</a>`:''}
+                <button class="btn text-sm px-3 py-2 rounded-xl ml-auto" data-copy="#${id}" title="Copy link to this card">Share</button>
+              </div>
+            </div>
+          </article>`;
+      }
+
+      function render(){
+        const filtered = sortGames(GAMES.filter(matches));
+        $grid.innerHTML = filtered.map(cardTemplate).join('');
+        document.getElementById('empty-state').classList.toggle('hidden', filtered.length!==0);
+
+        // Tilt + images (with safe fallbacks)
+        $grid.querySelectorAll('[data-tilt]').forEach(el => window.VanillaTilt && VanillaTilt.init(el, { max:6, speed:400, glare:true, "max-glare":0.12 }));
+        $grid.querySelectorAll('img.card-img').forEach(img => {
+          const src = img.getAttribute('data-src');
+          img.src = src;
+          img.onerror = () => { img.onerror = null; img.src = placeholder('Game'); };
+        });
+
+        // Share links
+        $grid.querySelectorAll('[data-copy]').forEach(btn => {
+          btn.onclick = async ()=>{
+            const url = location.origin + location.pathname + btn.getAttribute('data-copy');
+            try { await navigator.clipboard.writeText(url); btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Share', 1200); } catch { alert(url); }
+          };
+        });
+      }
+
+      // Search
+      $search.oninput = () => { state.query = $search.value; render(); };
+
+      // Custom sort dropdown
+      (function initSort(){
+        const control = document.getElementById('sort-control');
+        $sortBtn.addEventListener('click', ()=> $sortMenu.classList.toggle('hidden'));
+        document.addEventListener('click', (e)=>{ if(!control.contains(e.target)) $sortMenu.classList.add('hidden'); });
+        $sortMenu.querySelectorAll('[data-sort]').forEach(btn => btn.addEventListener('click', ()=>{
+          state.sort = btn.getAttribute('data-sort');
+          $sortLabel.textContent = btn.textContent.trim();
+          $sortMenu.classList.add('hidden');
+          render();
+        }));
+      })();
+
+      // Copy template
+      $copyTemplate.onclick = async () => {
+        const tpl = `{
+  id: 'new-game-id',
+  title: 'New Game Title',
+  subtitle: 'One-line hook',
+  cover: 'assets/your-image.jpg',
+  description: 'Short description of the gameplay and AI twist.',
+  tags: ['Canvas','JS','ML'],
+  links: { play: 'https://your-demo', code: 'https://github.com/you/repo', video: '' },
+  date: '2025-08-16'
+}`;
+        try { await navigator.clipboard.writeText(tpl); $copyTemplate.textContent='Copied!'; setTimeout(()=> $copyTemplate.textContent='Copy Game Object', 1200);} catch { alert(tpl); }
+      };
+
+      // Random play
+      document.getElementById('btn-random').onclick = () => {
+        const playable = GAMES.filter(g => g.links && g.links.play && g.links.play !== '#');
+        if (!playable.length) return alert('No play links yet — add one in the GAMES array!');
+        const pick = playable[Math.floor(Math.random()*playable.length)];
+        window.open(pick.links.play, '_blank');
+      };
+
+      // Init
+      renderTags();
+      render();
+
+      // HERO CANVAS — more reactive physics
+      (function initHeroCanvas(){
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let w,h,dpr,rect;
+        const N=80, RADIUS=180, FORCE=0.12, FRICTION=0.985, SPEED_CAP=1.6;
+        const nodes=[], mouse={x:0,y:0,active:false};
+
+        function resize(){ dpr=Math.max(1,window.devicePixelRatio||1); rect=canvas.getBoundingClientRect(); w=canvas.width=Math.floor(rect.width*dpr); h=canvas.height=Math.floor(rect.height*dpr); }
+        function rand(a,b){ return a+Math.random()*(b-a); }
+        function spawn(){ nodes.length=0; for(let i=0;i<N;i++) nodes.push({x:rand(0,w),y:rand(0,h),vx:rand(-0.4,0.4),vy:rand(-0.4,0.4),r:rand(1.6,3.6)*dpr,hue:rand(200,320)}); }
+        function limit(v,c){ return Math.max(-c, Math.min(c, v)); }
+
+        function step(){
+          ctx.clearRect(0,0,w,h);
+          for(let i=0;i<nodes.length;i++){
+            const a=nodes[i];
+            if(mouse.active){
+              const dx=mouse.x-a.x, dy=mouse.y-a.y, dist=Math.hypot(dx,dy);
+              if(dist<RADIUS*dpr && dist>0.001){ const pull=(1-dist/(RADIUS*dpr))*FORCE; a.vx += (dx/dist)*pull*4; a.vy += (dy/dist)*pull*4; }
+            }
+            a.vx = limit(a.vx*FRICTION, SPEED_CAP*dpr);
+            a.vy = limit(a.vy*FRICTION, SPEED_CAP*dpr);
+            a.x += a.vx; a.y += a.vy;
+            if(a.x<0||a.x>w) a.vx*=-1; if(a.y<0||a.y>h) a.vy*=-1;
+          }
+          for(let i=0;i<nodes.length;i++){ for(let j=i+1;j<nodes.length;j++){ const a=nodes[i],b=nodes[j], dx=a.x-b.x, dy=a.y-b.y, dist=Math.hypot(dx,dy); if(dist<140*dpr){ const alpha=(1-dist/(140*dpr))*0.55; ctx.strokeStyle=`hsla(${(a.hue+b.hue)/2},80%,70%,${alpha})`; ctx.lineWidth=1*dpr; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } } }
+          for(const p of nodes){ ctx.fillStyle=`hsl(${p.hue},90%,70%)`; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
+          requestAnimationFrame(step);
+        }
+
+        function onMove(e){ const r=canvas.getBoundingClientRect(); mouse.x=(e.clientX-r.left)*(window.devicePixelRatio||1); mouse.y=(e.clientY-r.top)*(window.devicePixelRatio||1); mouse.active=true; }
+        function onLeave(){ mouse.active=false; }
+
+        resize(); spawn(); step();
+        window.addEventListener('resize', ()=>{ resize(); spawn(); });
+        window.addEventListener('mousemove', onMove, {passive:true});
+        window.addEventListener('pointermove', onMove, {passive:true});
+        window.addEventListener('touchmove', e=>{ if(e.touches[0]) onMove(e.touches[0]); }, {passive:true});
+        window.addEventListener('mouseleave', onLeave);
+      })();
+    </script>
+  </body>
+</html>
